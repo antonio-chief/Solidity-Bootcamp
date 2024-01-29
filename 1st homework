@@ -34,4 +34,9 @@ contract Example {
     function get_counter_value() external view returns(uint) {
         return counter.number;
     }
+
+    // Add a query function that returns the description of counter
+    function get_counter_description() external view returns(string memory) {
+        return counter.description;
+    }
 }
