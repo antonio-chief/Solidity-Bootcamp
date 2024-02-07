@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+contract MyContract {
+    struct Proposal {
+        uint256 approve;
+        uint256 reject;
+        uint256 pass;
+    }
+
+    Proposal[] public proposal_history;
+    uint256 public counter;
+
+    function calculateCurrentState() view public returns (bool) {
+        Proposal storage proposal = proposal_history[counter];
+
+        uint256 approve = proposal.approve;
+        uint256 reject = proposal.reject;
+
+        // New logic: If more than 60% approve, return true
+        if (approve > (approve + reject) * 6 / 10) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
