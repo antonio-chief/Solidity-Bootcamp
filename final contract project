@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+contract ProposalContract {
+
+    uint256 private counter;
+
+    struct Proposal {
+        string title; 
+        string description; 
+        uint256 approve; 
+        uint256 reject; 
+        uint256 pass; 
+        uint256 total_vote_to_end; 
+        bool current_state; 
+        bool is_active; 
+        mapping(address => bool) hasVoted; // Mapping to track voting status of addresses
+    }
+
+    mapping(uint256 => Proposal) proposal_history;
+
+    function create(
+        string calldata _title,
+        string calldata _description,
+        uint256 _approve,
+        uint256 _reject,
+        uint256 _pass,
+        uint256 _total_vote_to_end
+    ) external {
+        counter += 1;
+        Proposal storage newProposal = proposal_history[counter];
+newProposal.title = _title;
+newProposal.description = _description;
+newProposal.approve = _approve;
+newProposal.reject = _reject;
+newProposal.pass = _pass;
+newProposal.total_vote_to_end = _total_vote_to_end;
+newProposal.current_state = false;
+newProposal.is_active = true;
+    }
+
+    function calculateCurrentState() public view returns (bool) {
+        Proposal storage proposal = proposal_history[counter];
+
+        uint256 approve = proposal.approve;
+        uint256 reject = proposal.reject;
+
+        // New logic: If more than 60% approve, return true
+        if (approve > (approve + reject) * 6 / 10) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function terminateProposal() public {
+        require(counter > 0, "No active proposal exists");
+        delete proposal_history[counter];
+        counter -= 1;
+    }
+    
+    function hasAddressVoted(uint256 proposalId, address voter) public view returns (bool) {
+        return proposal_history[proposalId].hasVoted[voter];
+    }
+    
+    function hasCurrentAddressVoted(address voter) public view returns (bool) {
+        return proposal_history[counter].hasVoted[voter];
+    }
+    
+    function hasVotedInAnyProposal(address voter) public view returns (bool) {
+        for (uint256 i = 1; i <= counter; i++) {
+            if (proposal_history[i].hasVoted[voter]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
